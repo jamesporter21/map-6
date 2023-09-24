@@ -103,15 +103,14 @@ p {
 }
 
 .mapboxgl-popup-content {
-  max-width: 400px;
-  width: 340px;
+  width: 50px;
   font: 16px/14px "Roboto", sans-serif;
   min-width: 120px;
   border: 2px solid #e39a59;
   border-radius: 15px;
   background-color: #ffffff;
   color: #21333f;
-  text-align: left;
+  text-align: center;
 }
 
 div.title {
