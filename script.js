@@ -34,6 +34,11 @@ var mainPointLongitude;
 
 var pointsForSearchArray = [];
 
+var popup = new mapboxgl.Popup({
+  closeButton: false
+});
+
+
 map.on("load", () => {
   // map.on("click", (event) => {
   //   const features = map.queryRenderedFeatures(event.point, {
@@ -84,15 +89,15 @@ map.on("load", () => {
     source: "counties",
     layout: {},
     paint: {
-      "line-color": 
-      // "#ffffff",
-      [
-        "case",
-        ["==", ["feature-state", "numUsers"], 2],
-        "rgba(255, 0, 0, 0.0)",
-        ["get", "color"]
-      ],
-      "line-width": 1
+      "line-color":
+        // "#ffffff",
+        [
+          "case",
+          ["==", ["feature-state", "numUsers"], 2],
+          "rgba(255, 0, 0, 0.0)",
+          ["get", "color"],
+        ],
+      "line-width": 1,
     },
   });
 
@@ -108,13 +113,24 @@ map.on("load", () => {
       { numUsers: 2 }
     );
   });
-  // const allFeatures = map.queryRenderedFeatures({ layers: ["ACTIVE BLOCKS"] });
-  // console.log(allFeatures);
 
-  // map.setPaintProperty("ACTIVE BLOCKS", "fill-opacity", 0);
+  map.on("mousemove", "ACTIVE BLOCKS", function (e) {
+    // Change the cursor style as a UI indicator.
+    map.getCanvas().style.cursor = "pointer";
 
-  console.log(map.getSource("counties"));
+    // Single out the first found feature.
+    var feature = e.features[0];
 
+    // Display a popup with the name of the county
+    popup.setLngLat(e.lngLat).setText(feature.properties.name).addTo(map);
+  });
+
+  map.on("mouseleave", "ACTIVE BLOCKS", function () {
+    map.getCanvas().style.cursor = "";
+    popup.remove();
+  });
+
+  // Add DISD boundary
   map.addSource("disd-boundary", {
     type: "vector",
     url: "mapbox://jamesporter21.66qhulir",
