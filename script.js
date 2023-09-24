@@ -10,7 +10,7 @@ var maxBounds = [
 
 var map = new mapboxgl.Map({
   container: "map",
-  style: "mapbox://styles/jamesporter21/clmwbb4ql02rx01qxh0faaju8",
+  style: "mapbox://styles/jamesporter21/clmx29w1a00wu01qneco67iyw",
   center: [-96.7853964, 32.7846839],
   zoom: 10,
   // maxBounds: maxBounds,
@@ -21,7 +21,6 @@ var map = new mapboxgl.Map({
 
 var nav = new mapboxgl.NavigationControl({ showCompass: false });
 map.addControl(nav, "top-left");
-
 
 var markersAllIds = [];
 
@@ -38,7 +37,7 @@ var pointsForSearchArray = [];
 map.on("load", () => {
   // map.on("click", (event) => {
   //   const features = map.queryRenderedFeatures(event.point, {
-  //     layers: ["all-9l351t"],
+  //     layers: ["all-86q2b1"],
   //   });
   //   if (!features.length) {
   //     return;
@@ -53,35 +52,27 @@ map.on("load", () => {
 
   map.addSource("counties", {
     type: "vector",
-    url: "mapbox://jamesporter21.73b25k3s",
-    promoteId: { "all-9l351t": "layer" },
+    url: "mapbox://jamesporter21.0jao2dyh",
+    promoteId: { "all-86q2b1": "name" },
   });
 
   map.addLayer({
     id: "ACTIVE BLOCKS",
     type: "fill",
-    // visibility: "visible",
-    // visibility: [
-    //   "case",
-    //   ["==", ["feature-state", "numUsers"], 1],
-    //   "visible",
-    //   "none"
-    // ],
-
-    "source-layer": "all-9l351t",
+    "source-layer": "all-86q2b1",
     source: "counties",
     layout: {},
-    visibility: "visible",
     paint: {
-      // "fill-color": "red",
-      "fill-color": [
-        "case",
-        ["==", ["feature-state", "numUsers"], 2],
-        "rgba(255, 0, 0, 0.0)",
-        // ["==", ["feature-state", "numUsers"], 2],
-        // "green",
-        "blue",
-      ],
+      "fill-color":
+        // ["get", "color"],
+        [
+          "case",
+          ["==", ["feature-state", "numUsers"], 2],
+          "rgba(255, 0, 0, 0.0)",
+          ["get", "color"],
+          // "blue",
+        ],
+      "fill-opacity": 0.3,
     },
   });
 
@@ -89,24 +80,68 @@ map.on("load", () => {
     id: "boxes-outline-layer",
     type: "line",
     visibility: "visible",
-    "source-layer": "all-9l351t",
+    "source-layer": "all-86q2b1",
     source: "counties",
     layout: {},
     paint: {
-      "line-color": "#ffffff",
-      "line-width": 1,
+      "line-color": 
+      // "#ffffff",
+      [
+        "case",
+        ["==", ["feature-state", "numUsers"], 2],
+        "rgba(255, 0, 0, 0.0)",
+        ["get", "color"]
+      ],
+      "line-width": 1
     },
   });
 
-  var zipCodesArray = [];
-  const features = map.queryRenderedFeatures({
-    layers: ["ACTIVE BLOCKS"],
+  var zipsArray = [
+    75217, 75216, 75232, 75220, 75227, 75203, 75212, 75228, 75244, 75241, 75253,
+    75215, 75204, 75224, 75231, 75211, 75237, 75223, 75159, 75201, 75233, 75218,
+    75238, 75229, 75235, 75226, 75210, 75202, 75209, 75219, 75205, 75001, 75006,
+    75115, 75150, 75172, 75206, 75208, 75214, 75230, 75234, 75236, 75246, 75254,
+  ];
+  zipsArray.forEach(function (zipCode) {
+    map.setFeatureState(
+      { id: zipCode, source: "counties", sourceLayer: "all-86q2b1" },
+      { numUsers: 2 }
+    );
   });
-  features.forEach(function (feature) {
-    console.log(feature.id);
-    zipCodesArray.push(feature.id);
+  // const allFeatures = map.queryRenderedFeatures({ layers: ["ACTIVE BLOCKS"] });
+  // console.log(allFeatures);
+
+  // map.setPaintProperty("ACTIVE BLOCKS", "fill-opacity", 0);
+
+  console.log(map.getSource("counties"));
+
+  map.addSource("disd-boundary", {
+    type: "vector",
+    url: "mapbox://jamesporter21.66qhulir",
+    promoteId: { "disd-border-a2c95i": "layer" },
   });
-  console.log(zipCodesArray);
+
+  map.addLayer({
+    id: "disd-outline-layer",
+    type: "line",
+    visibility: "visible",
+    "source-layer": "disd-border-a2c95i",
+    source: "disd-boundary",
+    layout: {},
+    paint: {
+      "line-color": "#dd1db7",
+      "line-width": 2,
+    },
+  });
+
+  // var zipCodesArray = [];
+  // const features = map.queryRenderedFeatures({
+  //   layers: ["ACTIVE BLOCKS"],
+  // });
+  // features.forEach(function (feature) {
+  //   console.log(feature.id);
+  //   zipCodesArray.push(feature.id);
+  // });
 });
 
 // popup toggling //
@@ -133,14 +168,42 @@ $("input[type='checkbox'][name='filter-by-first-type-input']").click(
     var currentCountry = $(this).val();
     console.log(currentCountry);
     if ($(this).is(":checked")) {
+      console.log(
+        map.getFeatureState({
+          id: currentCountry,
+          source: "counties",
+          sourceLayer: "all-86q2b1",
+        })
+      );
       map.setFeatureState(
-        { id: currentCountry, source: "counties", sourceLayer: "all-9l351t" },
+        { id: currentCountry, source: "counties", sourceLayer: "all-86q2b1" },
         { numUsers: 1 }
       );
+      console.log(
+        map.getFeatureState({
+          id: currentCountry,
+          source: "counties",
+          sourceLayer: "all-86q2b1",
+        })
+      );
     } else {
+      console.log(
+        map.getFeatureState({
+          id: currentCountry,
+          source: "counties",
+          sourceLayer: "all-86q2b1",
+        })
+      );
       map.setFeatureState(
-        { id: currentCountry, source: "counties", sourceLayer: "all-9l351t" },
-        { numUsers: 2 }
+        { id: currentCountry, source: "counties", sourceLayer: "all-86q2b1" },
+        { numUsers: 2 },
+        console.log(
+          map.getFeatureState({
+            id: currentCountry,
+            source: "counties",
+            sourceLayer: "all-86q2b1",
+          })
+        )
       );
     }
   }
